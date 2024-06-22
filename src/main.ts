@@ -32,7 +32,7 @@ const resetViewButton = document.getElementById(
   'resetView',
 ) as HTMLButtonElement;
 
-let particleCount: number = 1000;
+let particleCount: number = 2000;
 const particleTypes: number = 5;
 let particles: Particle[] = [];
 let interactionMatrix: number[][] = [];
@@ -51,19 +51,19 @@ const colors: string[] = [
   '#33FFF5',
 ];
 
-// Pan and zoom variables
+// Update pan and zoom variables
 let scale: number = 1;
-let offsetX: number = 0;
-let offsetY: number = 0;
+let translateX: number = 0;
+let translateY: number = 0;
 let isDragging: boolean = false;
 let lastMouseX: number = 0;
 let lastMouseY: number = 0;
-let viewportWidth: number = 2000;
-let viewportHeight: number = 2000;
+let mapWidth: number = 2000;
+let mapHeight: number = 2000;
 
 function resizeCanvas(): void {
-  canvas.width = window.innerWidth - 250;
-  canvas.height = window.innerHeight;
+  canvas.width = mapWidth;
+  canvas.height = mapHeight;
 }
 
 resizeCanvas();
@@ -88,30 +88,18 @@ class Particle {
     this.x += this.vx;
     this.y += this.vy;
 
-    if (this.x < 0) this.x += viewportWidth;
-    if (this.x > viewportWidth) this.x -= viewportWidth;
-    if (this.y < 0) this.y += viewportHeight;
-    if (this.y > viewportHeight) this.y -= viewportHeight;
+    if (this.x < 0) this.x += mapWidth;
+    if (this.x > mapWidth) this.x -= mapWidth;
+    if (this.y < 0) this.y += mapHeight;
+    if (this.y > mapHeight) this.y -= mapHeight;
 
     this.vx *= friction;
     this.vy *= friction;
   }
 
   draw(): void {
-    const screenX = (this.x - offsetX) * scale;
-    const screenY = (this.y - offsetY) * scale;
-
-    if (
-      screenX < -particleSize ||
-      screenX > canvas.width + particleSize ||
-      screenY < -particleSize ||
-      screenY > canvas.height + particleSize
-    ) {
-      return;
-    }
-
     ctx.beginPath();
-    ctx.arc(screenX, screenY, particleSize * scale, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, particleSize, 0, Math.PI * 2);
     ctx.fillStyle = colors[this.type];
     ctx.fill();
   }
@@ -120,8 +108,8 @@ class Particle {
 function initializeParticles(): void {
   particles = [];
   for (let i = 0; i < particleCount; i++) {
-    const x = Math.random() * viewportWidth;
-    const y = Math.random() * viewportHeight;
+    const x = Math.random() * mapWidth;
+    const y = Math.random() * mapHeight;
     const type = Math.floor(Math.random() * particleTypes);
     particles.push(new Particle(x, y, type));
   }
@@ -160,6 +148,8 @@ function update(): void {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
+  ctx.save();
+
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
       interact(particles[i], particles[j]);
@@ -172,7 +162,13 @@ function update(): void {
     particle.draw();
   });
 
+  ctx.restore();
+
   requestAnimationFrame(update);
+}
+
+function applyTransform(): void {
+  canvas.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
 }
 
 function applyPreset(preset: string): void {
@@ -270,11 +266,12 @@ resetSimulationButton.addEventListener('click', () => {
 
 resetViewButton.addEventListener('click', () => {
   scale = 1;
-  offsetX = viewportWidth / 2 - canvas.width / (2 * scale);
-  offsetY = viewportHeight / 2 - canvas.height / (2 * scale);
+  translateX = 0;
+  translateY = 0;
+  applyTransform();
 });
 
-// Improved pan functionality
+// Updated pan functionality
 canvas.addEventListener('mousedown', (e: MouseEvent) => {
   isDragging = true;
   lastMouseX = e.clientX;
@@ -285,10 +282,11 @@ canvas.addEventListener('mousemove', (e: MouseEvent) => {
   if (isDragging) {
     const deltaX = (e.clientX - lastMouseX) / scale;
     const deltaY = (e.clientY - lastMouseY) / scale;
-    offsetX -= deltaX;
-    offsetY -= deltaY;
+    translateX += deltaX;
+    translateY += deltaY;
     lastMouseX = e.clientX;
     lastMouseY = e.clientY;
+    applyTransform();
   }
 });
 
@@ -300,7 +298,7 @@ canvas.addEventListener('mouseleave', () => {
   isDragging = false;
 });
 
-// Improved zoom functionality
+// Updated zoom functionality
 canvas.addEventListener('wheel', (e: WheelEvent) => {
   e.preventDefault();
   const zoomIntensity = 0.1;
@@ -311,13 +309,16 @@ canvas.addEventListener('wheel', (e: WheelEvent) => {
 
   const newScale = scale * zoom;
   if (newScale > 0.1 && newScale < 10) {
-    const mouseWorldX = mouseX / scale + offsetX;
-    const mouseWorldY = mouseY / scale + offsetY;
-
+    const mouseXBeforeZoom = mouseX / scale - translateX;
+    const mouseYBeforeZoom = mouseY / scale - translateY;
     scale = newScale;
+    const mouseXAfterZoom = mouseX / scale - translateX;
+    const mouseYAfterZoom = mouseY / scale - translateY;
 
-    offsetX = mouseWorldX - mouseX / scale;
-    offsetY = mouseWorldY - mouseY / scale;
+    translateX += mouseXAfterZoom - mouseXBeforeZoom;
+    translateY += mouseYAfterZoom - mouseYBeforeZoom;
+
+    applyTransform();
   }
 });
 
