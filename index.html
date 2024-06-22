@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Particle Life Simulation with Improved Pan and Zoom</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+      }
+      #controlPanel {
+        width: 250px;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        height: 100vh;
+      }
+      #canvasContainer {
+        flex-grow: 1;
+        overflow: hidden;
+      }
+      canvas {
+        border: 1px solid #000;
+        background-color: #000;
+      }
+      button,
+      select {
+        margin: 5px 0;
+        width: 100%;
+        padding: 5px;
+      }
+      label {
+        display: block;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controlPanel">
+      <h2>Control Panel</h2>
+      <select id="presetSelect">
+        <option value="random">Random</option>
+        <option value="galaxies">Galaxies</option>
+        <option value="bubbles">Bubbles</option>
+        <option value="snakes">Snakes</option>
+        <option value="flocking">Flocking</option>
+      </select>
+      <button id="applyPreset">Apply Preset</button>
+      <label for="particleCount">Particle Count:</label>
+      <input
+        type="number"
+        id="particleCount"
+        min="100"
+        max="10000"
+        value="1000"
+      />
+      <label for="friction">Friction:</label>
+      <input
+        type="range"
+        id="friction"
+        min="0.8"
+        max="0.99"
+        step="0.01"
+        value="0.9"
+      />
+      <label for="forceFactor">Force Factor:</label>
+      <input
+        type="range"
+        id="forceFactor"
+        min="0.1"
+        max="10"
+        step="0.1"
+        value="1"
+      />
+      <label for="interactionRange">Interaction Range:</label>
+      <input
+        type="range"
+        id="interactionRange"
+        min="10"
+        max="200"
+        step="1"
+        value="50"
+      />
+      <label for="trailEffect">Trail Effect:</label>
+      <input type="checkbox" id="trailEffect" checked />
+      <label for="trailIntensity">Trail Intensity:</label>
+      <input
+        type="range"
+        id="trailIntensity"
+        min="0.01"
+        max="0.2"
+        step="0.01"
+        value="0.05"
+      />
+      <label for="particleSize">Particle Size:</label>
+      <input
+        type="range"
+        id="particleSize"
+        min="0.5"
+        max="5"
+        step="0.1"
+        value="1.5"
+      />
+      <button id="resetSimulation">Reset Simulation</button>
+      <button id="resetView">Reset View</button>
+    </div>
+    <div id="canvasContainer">
+      <canvas id="particleCanvas"></canvas>
+    </div>
+    <script type="module" src="src/main.ts"></script>
+  </body>
+</html>
