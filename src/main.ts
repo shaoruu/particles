@@ -38,10 +38,19 @@ let particles: Particle[] = [];
 let interactionMatrix: number[][] = [];
 let friction: number = 0.9;
 let forceFactor: number = 1;
-let interactionRange: number = 50;
+let interactionRange: number = 200;
 let trailEffect: boolean = true;
 let trailIntensity: number = 0.05;
 let particleSize: number = 1.5;
+
+// Apply default values to controls
+particleCountInput.value = particleCount.toString();
+frictionInput.value = friction.toString();
+forceFactorInput.value = forceFactor.toString();
+interactionRangeInput.value = interactionRange.toString();
+trailEffectInput.checked = trailEffect;
+trailIntensityInput.value = trailIntensity.toString();
+particleSizeInput.value = particleSize.toString();
 
 const colors: string[] = [
   '#FF5733',
